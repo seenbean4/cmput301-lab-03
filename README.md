@@ -7,11 +7,11 @@
 
 ## References and Resources
 
-List any resources used here, or simply put `N/A` if not applicable.
+"How to set a variable as a clicked item in Kotlin" prompt. Claude, Sonnet 5 version, Anthropic, 17 Sept. 2026, claude.ai.
 
 ## Verbal Collaboration
 
 | Student Name | CCID      |
 | ------------ | --------- |
-| `student`    | `student` |
-| `<Add more>` | `<CCID>`  |
+| `N/A`        | `N/A`     |
+|              |           |
