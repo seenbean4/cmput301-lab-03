@@ -12,6 +12,13 @@ class CityRepository {
         _cities.add(city)
     }
 
+    fun editCity(old: City, updated: City) {
+        val index = _cities.indexOf(old)
+        if (index != -1) {
+            _cities[index] = updated
+        }
+    }
+
     val cities: List<City>
         get() = _cities
 }

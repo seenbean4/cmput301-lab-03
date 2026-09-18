@@ -27,15 +27,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.foundation.layout.fillMaxSize
+
+import androidx.compose.foundation.clickable
+
+// All implementation changes from here were referenced from Generative AI
+// "How to set a variable as a clicked item in Kotlin" prompt,
+// as well as sharing some function definitions for context.
+// Claude, Sonnet 5 version, Anthropic, 17 Sept. 2026, claude.ai.
 @Composable
 fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
+    onEditCity: (City, City) -> Unit, // (old, updated)
     modifier: Modifier = Modifier
 ) {
     var newCityName by remember { mutableStateOf("") }
     var newProvinceName by remember { mutableStateOf("") }
     var showAddCityFields by remember { mutableStateOf(false) }
+    var cityToEdit by remember { mutableStateOf<City?>(null)}
     Column(modifier = modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -45,6 +54,9 @@ fun CityListScreen(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
                         showAddCityFields = !showAddCityFields
+                        if (!showAddCityFields) {
+                            cityToEdit = null // unclicking button -> reset city clicked
+                        }
                     }
                 ) {
                     Text("+")
@@ -78,26 +90,45 @@ fun CityListScreen(
                     modifier = Modifier.padding(vertical = 12.dp),
                     onClick = {
                         if (newCityName.isNotBlank() && newProvinceName.isNotBlank()) {
-                            onAddCity(
-                                City(
-                                    name = newCityName,
-                                    province = newProvinceName
+                            val editing = cityToEdit
+                            if (editing == null) { // no city selected to edit
+                                onAddCity(
+                                    City(
+                                        name = newCityName,
+                                        province = newProvinceName
+                                    )
                                 )
-                            )
+                                showAddCityFields = false
+                            } else {
+                                onEditCity(
+                                    editing,
+                                    editing.copy(
+                                        name = newCityName,
+                                        province = newProvinceName
+                                    )
+                                )
+                            }
                             newCityName = ""
                             newProvinceName = ""
-                            showAddCityFields = false
+                            cityToEdit = null
                         }
                     }
                 ) {
-                    Text("Add City")
+                    Text(if (cityToEdit == null) "Add City" else "Update City")
                 }
             }
         }
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             itemsIndexed(cities) { index, city ->
-                CityRow(city = city)
+                CityRow(
+                    city = city,
+                    onClick = {
+                        cityToEdit = city
+                        newCityName = city.name
+                        newProvinceName = city.province
+                    }
+                )
                 if (index < cities.lastIndex) {
                     HorizontalDivider()
                 }
@@ -107,10 +138,11 @@ fun CityListScreen(
 }
 
 @Composable
-fun CityRow(city: City) {
+fun CityRow(city: City, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable{ onClick() }
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
@@ -137,7 +169,8 @@ fun CityListScreenPreview() {
                 City("Vancouver", "BC"),
                 City("Calgary", "AB")
             ),
-            onAddCity = {}
+            onAddCity = {},
+            onEditCity = {_, _ -> }
         )
     }
 }
